@@ -12,3 +12,6 @@ The resulting file can be read by multiple commercial and open-source spike sort
 * [Spikesort](http://www.smithlab.net/spikesort.html) from Matt Smith's lab 
 
 I would appreciate help in testing the code. A word of warning, it will run very slowly with extracellular recordings from recording probes with lots of contacts. Data I use it for involve recordings taken from multilaminar probes with 32 contacts. It could probably work reasonably well up to 128 channels. Optimizing it to scale upward is a future goal. 
+
+*License*
+The code is provided for free via the GNU General Public License, see license file in this repository for further details. 
