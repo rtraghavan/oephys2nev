@@ -16,4 +16,4 @@ I would appreciate help in testing the code. A word of warning, it will run very
 
 **License**
 ---
-The code is provided for free via the GNU General Public License, see license file in this repository for further details. 
+The code is provided for free via the GNU General Public License. See license file in this repository for further details. 
