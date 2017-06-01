@@ -17,8 +17,9 @@ I would appreciate help in testing the code. A word of warning, it will run very
 **Requirements**
 ---
 To run this code you need the following
-1. [Matlab](https://www.mathworks.com/products/matlab.html)
-2. [Open ephys analysis tools](https://github.com/open-ephys/analysis-tools)
+1. [Matlab](https://www.mathworks.com/products/matlab.html) 
+2. [Matlab's signal processing toolbox](https://www.mathworks.com/products/signal.html)
+3. [Open ephys analysis tools](https://github.com/open-ephys/analysis-tools)
 
 **To run**
 ---
