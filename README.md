@@ -1,6 +1,6 @@
 **Overview**
 ---
-This repository contains two matlab scripts that are used to convert extracellular voltage data that has been continuously acquired using an [open ephys system](http://www.open-ephys.org/) to the .nev format. This code is based on a similar function, plx2nev developed by [Matt Smith](http://www.smithlab.net). To do so it executes the following steps.
+This repository contains two matlab scripts that are used to convert extracellular voltage data that has been continuously acquired using an [open ephys system](http://www.open-ephys.org/) to the .nev format. This code is based on a similar function, plx2nev developed by [Matt Smith's lab at the University of Pittsburgh](http://www.smithlab.net). To do so it executes the following steps.
 
 1. Import data
 2. Filter data according to user specifications
