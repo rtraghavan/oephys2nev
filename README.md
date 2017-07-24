@@ -25,6 +25,10 @@ To run this code you need the following
 ---
 Running the code is relatively simple, add the scripts and the required open ephys analysis tools scripts to your path and execute oephys2nev.m. I am working on detailed instructions. 
 
+**A note on operating systems**
+This should work across most operating systems. It was written and tested using Matlab 2016b running in Mac OS X 10.11.6. It was also tested on a computer running Windows 7. If you have a problem post to issues above and I will see if I can help. 
+
+
 **License**
 ---
 The code is provided for free via the GNU General Public License. See license file in this repository for further details. 
