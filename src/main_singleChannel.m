@@ -94,8 +94,8 @@ for iHeader=1:numExtHdr
     fwrite(fidWrite, blanks(6), 'uchar'); % Remaining bytes reserved
 end
 %% Sequential read and writing of spikes
-% need to keep track of locations in each file, number of open-ephys waves that
-% were not written, number of waves that were written
+% need to keep track of locations in each file, number of open-ephys waves
+% that were not written, number of waves that were written
 
 %Read and write: timestamp, waveform, sort code
 
