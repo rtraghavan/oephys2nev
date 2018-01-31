@@ -39,20 +39,44 @@ function [waveforms,timestamps,codes,info,directory] = extractwaveforms(dataIden
 %
 %
 %OUTPUT:
-%   waveforms:              mxn matrix with m corresponding to 2 ms of waveform time
-
+%   waveforms:              mxn matrix with m corresponding to user
+%                           selected ms of waveform time
+%
+%   timestamps:             nx1 matrix of timestamps, where n is the number
+%                           of detected threshold crossings
+%   
+%   codes:                  nx1 matrix of codes corresponding to which
+%                           channel a given spike was detected on
 % 
-% 
-% 
-% 
+%   info:                   info output given by third argument in
+%                           load_open_ephys_data_faster.m
+%       
+%
+%
 % Author: Ramanujan Raghavan
 % Version 1.0
-% Date Updated: 06-05-2017
+% Date Updated: 01-31-2018
 % Post issues to: https://github.com/rtraghavan/oephys2nev/issues
 
 
 
+
+%%
+
+value = exist(dataIdentifier);
+if value == 7 %it's a folder
+    
+elseif value == 2 %it's a file
+    
+else
+    error('neither folder nor file seems to have been selected')
+end
+
+    
+    
 %% ask user for directory of files, and set up basic inputs to reading in data
+
+
 directory = uigetdir;
 prompt = {'Enter channel number:','Low pass filter cutoff:','High pass filter cutoff:','param x std(noise)'};
 dlg_title = 'Input';
