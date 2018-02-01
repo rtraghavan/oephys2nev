@@ -1,31 +1,49 @@
-%{
-    Script Name: oephys2nev.m
-    Script Description: Goal: write nev file from open ephys data
+function [nevFile] = write2nev(sortingParams,waveforms,timestamps,codes,info,adcChannel)
+%WRITE2NEV: final stage of sorting, takes output from extract waveforms and
+%writes it to a .nev file that can be open in many programs.
+%
+%
+%This code is heavily based on plx2nev, written by Matt Smith for his
+%program SpikeSort (http://www.smithlab.net)
+%
+%INPUT:
+%
+%       sortingParams:  structure produced by getsortingparams that has
+%                       important variables in it relevant to this function. See
+%                       getsortingparams.m for more detail.
+%
+%       waveforms:      mxn matrix with m corresponding to user
+%                       selected ms of waveform time
+%
+%       timestamps:     nx1 matrix of timestamps, where n is the number
+%                       of detected threshold crossings
+%   
+%       codes:          nx1 matrix of codes corresponding to which
+%                       channel a given spike was detected on
+% 
+%       info:           info output given by third argument in
+%                       load_open_ephys_data_faster.m. This is a function
+%                       used by extractwaveforms.m to load data.
+%
+%       adcChannel:     this is a flag, in one session single electrodes
+%                       sent through ADC4.continuous had an odd voltage
+%                       scaling that needed to be corrected. For almost
+%                       everyone else this would likely take a default
+%                       value of 0
+%
+%
+%OUTPUT:
+%       A .nev file is written by this code that can be read using plexon
+%       offline sorter or a number of other programs including Spike2, Matt
+%       Smiths Spikesort, and likely (though not currently tested) the BOSS
+%       spike sorter provided by Blackrock.
 
-    This relies on a subsidiary function, open_ephys_filt_to_mat.m
-    which opens open enphys files, filters them a bit, writes data out
 
-    Then it writes a NEV file using the output of this initial function.
 
-    Based on plx2nev by Matt Smith (http://www.smithlab.net)
+%final file name stored in sortingParams
+nevFile = sortingParams.nevFileOutput;
 
-    Author: Ramanujan Raghavan
-    Version: 1.0
-    Last updated: June-1-2017
-    Post issues to: https://github.com/rtraghavan/oephys2nev/issues
-%}
-
-clear variables
-%% Load test data
-[waveforms,timestamps,codes,info,directory] = open_ephys_filt_to_mat();
-
-%% now write header for .nev file
-
-%I decided the simplest way was to copy the directory name and let the user
-%edit it, this might change in the future.
-defaultans = {directory};
-[FileName,PathName] = uiputfile('*.nev','Save File As',[defaultans{:} '.nev']);
-nevFile = [PathName FileName];
+% (1)  Write header
 % check to see if the file exists, if it does delete it, otherwise you'll
 % be writing over an old file which is a bad idea.
 if exist(nevFile,'file') == 2
@@ -35,9 +53,9 @@ else
     fidWrite = fopen(nevFile, 'w', 'l');
 end
 
-%% write content to header
-%this section uses large sections of code from the Smith lab's code
-%plx2nev.m
+% (2) write content to header
+
+%this section borrows heavily from  Matt Smith lab's code plx2nev.m
 
 nWordsinWave = size(waveforms,1);
 numExtHdr = length(unique(codes)); % number of channels, which is the number of uniquely identified channels.
@@ -92,8 +110,8 @@ for iHeader=1:numExtHdr
     fwrite(fidWrite, blanks(6), 'uchar'); % Remaining bytes reserved
 end
 %% Sequential read and writing of spikes
-% need to keep track of locations in each file, number of open-ephys waves that
-% were not written, number of waves that were written
+% need to keep track of locations in each file, number of open-ephys waves
+% that were not written, number of waves that were written
 
 %Read and write: timestamp, waveform, sort code
 
@@ -140,7 +158,15 @@ for i = 1:length(timestamps)
             end
             fwrite(fidWrite, 0, 'uchar'); % Reserved for future unit info
             
-            %Write waveform
+            %Write waveform. In the case that we take in data via ADC
+            %channels on open ephys, there is a voltage conversion
+            %difference that gets washed out by conversion to int16. Just
+            %in case scale amplitude by 500 to ensure resolution. 
+            
+            if adcChannel == 1
+                waveform = waveform*500;
+            end
+            
             fwrite(fidWrite, waveform, 'int16'); % Write waveform
             
             % status message as spikes are written
@@ -155,4 +181,6 @@ for i = 1:length(timestamps)
 end % End of while loop to read/write waves
 
 fclose(fidWrite);
-clear variables
+disp('done!');
+
+end
