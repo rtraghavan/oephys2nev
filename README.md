@@ -23,7 +23,7 @@ To run this code you need the following
 
 **To run**
 ---
-Running the code is relatively simple, add the scripts and the required open ephys analysis tools scripts to your path and execute main_script.m. 
+Running the code is relatively simple, add the scripts and the required open ephys analysis tools scripts to your path and execute main_example.m. Further information is available on the [Wiki page](https://github.com/rtraghavan/oephys2nev/wiki) 
 
 **A note on operating systems**
 This should work across most operating systems. It was written and tested using Matlab 2016b running in Mac OS X 10.11.6. It was also tested on a computer running Windows 10. If you have a problem post to issues above and I will see if I can help.
