@@ -1,5 +1,5 @@
 
-function [waveforms,timestamps,codes,info] = extractwaveforms(dataIdentifier,filterOrder,lowPassCutoff,highPassCutoff,thresholdMultiplier,waveformLength)
+function [waveforms,timestamps,codes,info] = extractwaveforms(dataIdentifier,filterOrder,lowPassCutoff,highPassCutoff,thresholdMult,waveformLength)
 
 %WARNING: THIS IS CODE IN PROGRESS IT DOES NOT RUN CURRENTLY. 
 %
@@ -31,7 +31,7 @@ function [waveforms,timestamps,codes,info] = extractwaveforms(dataIdentifier,fil
 %   highPassCutoff:         highpass cutoff in Hz for extracting spikeband
 %                           signal (default 500 Hz)
 % 
-%   thresholdMultiplier:    scale factor to multiple by sigma obtained from
+%   thresholdMult:          scale factor to multiple by sigma obtained from
 %                           MAD estimator (default 5)
 %
 %   waveformLength:         Length (in ms) of waveform snippets to be
@@ -82,7 +82,7 @@ end
     
 
 waveformsUnsorted = [];
-timestamps = [];
+timestampsUnsorted = [];
 codesUnsorted = [];
 
 for z = 1:channelNumber
@@ -107,7 +107,7 @@ for z = 1:channelNumber
     spikeBandSignal = filter(b,a,data);
 
     %calculate threshold, ignoring initial transient caused by filter
-    thresh = median(abs(spikeBandSignal)/.6745) * thresholdMultiplier;
+    thresh = median(abs(spikeBandSignal)/.6745) * thresholdMult;
 
     %Threshhold crossings are done on the rectified filtered signal, but at
     %some point waveforms need to be aligned to either their maximum or
@@ -192,7 +192,7 @@ for z = 1:channelNumber
     end
 
     waveformsUnsorted = cat(2,waveformsUnsorted,waveforms_temp);
-    timestampsUnsorted = cat(1,timestamps,timestamps_temp);
+    timestampsUnsorted = cat(1,timestampsUnsorted,timestamps_temp);
     
     %get code number from file if needbe
     if z >1
