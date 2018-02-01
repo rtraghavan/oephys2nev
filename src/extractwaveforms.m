@@ -1,9 +1,6 @@
 
 function [waveforms,timestamps,codes,info] = extractwaveforms(dataIdentifier,filterOrder,lowPassCutoff,highPassCutoff,thresholdMult,waveformLength)
 
-%WARNING: THIS IS CODE IN PROGRESS IT DOES NOT RUN CURRENTLY. 
-%
-%
 %EXTRACTWAVEFORMS: given either a specific .continuous or .ADC file or a
 %set of .continuous fiels, extract threshold crossing times and waveforms
 %for them.
