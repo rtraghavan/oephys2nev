@@ -1,5 +1,5 @@
 
-function [waveforms,timestamps,codes,info] = extractwaveforms(dataIdentifier,filterOrder,lowPassCutoff,highPassCutoff,thresholdMult,waveformLength)
+function [waveforms,timestamps,codes,info] = extractwaveforms(dataIdentifier,filterType,lowPassCutoff,highPassCutoff,thresholdMult,waveformLength)
 
 %EXTRACTWAVEFORMS: given either a specific .continuous or .ADC file or a
 %set of .continuous fiels, extract threshold crossing times and waveforms
@@ -19,15 +19,15 @@ function [waveforms,timestamps,codes,info] = extractwaveforms(dataIdentifier,fil
 %                           stored in .continuous format that you want to
 %                           spikesort
 %
-%   filterOrder:            filter order for butterworth filter used to
-%                           extract spikeband signal (default 3)
-%   
+%   filterType:             flag for filter type. Either Butterworth or
+%                           FIR. FIR will reduce speed.
+%
 %   lowPassCutoff:          lowpass cutoff in Hz for extracting spikeband
 %                           signal (default 5000 Hz)
 %
 %   highPassCutoff:         highpass cutoff in Hz for extracting spikeband
 %                           signal (default 500 Hz)
-% 
+%
 %   thresholdMult:          scale factor to multiple by sigma obtained from
 %                           MAD estimator (default 5)
 %
@@ -41,13 +41,13 @@ function [waveforms,timestamps,codes,info] = extractwaveforms(dataIdentifier,fil
 %
 %   timestamps:             nx1 matrix of timestamps, where n is the number
 %                           of detected threshold crossings
-%   
+%
 %   codes:                  nx1 matrix of codes corresponding to which
 %                           channel a given spike was detected on
-% 
+%
 %   info:                   info output given by third argument in
 %                           load_open_ephys_data_faster.m
-%       
+%
 %
 %
 % Author: Ramanujan Raghavan
@@ -76,7 +76,7 @@ else
     error('neither folder nor file seems to have been selected')
 end
 
-    
+
 
 waveformsUnsorted = [];
 timestampsUnsorted = [];
@@ -100,8 +100,17 @@ for z = 1:channelNumber
 
 
     %filter data
-    [b,a] = butter(filterOrder,[highPassCutoff lowPassCutoff]/(samplingrate/2),'bandpass');
-    spikeBandSignal = filter(b,a,data);
+    %you can do this with an fir filter if you prefer, just comment out butter and replkcae it with fir1 below.
+
+    nyquist = samplingrate/2;
+    firFilterOrder = samplingrate/lowPassCutoff * 3; %filter order is 3*lowest frequency specified datapoints
+    win = hamming(firFilterOrder+1);
+
+    %[b,a]  = fir1(firFilterOrder, [lowPassCutoff highPassCutoff]/(samplingrate/2), 'bandpass', win);
+
+
+    [b,a] = butter(filterOrder,[highPassCutoff lowPassCutoff]/nyquist,'bandpass');
+    spikeBandSignal = filtfilt(b,a,data); %zero phase filter. 
 
     %calculate threshold, ignoring initial transient caused by filter
     thresh = median(abs(spikeBandSignal)/.6745) * thresholdMult;
@@ -136,7 +145,7 @@ for z = 1:channelNumber
     % end
 
 
-    
+
     %prepare to realign waveforms
     %I did something simple, looked a certain amount of time before and
     %after the spike. It is symmetric currently, another option would be to
@@ -148,7 +157,7 @@ for z = 1:channelNumber
     %detected very early or more likely filter transients driven by the
     %fact I do not zero pad before filtering. Which I should in future
     %releases.
-    
+
     border = one_ms*(waveformLength/2)+1;
     hstart = hstart(hstart>border & hstart<(length(spikeBandSignal)-border));
     hstart2 = num2cell(hstart);
@@ -190,14 +199,14 @@ for z = 1:channelNumber
 
     waveformsUnsorted = cat(2,waveformsUnsorted,waveforms_temp);
     timestampsUnsorted = cat(1,timestampsUnsorted,timestamps_temp);
-    
+
     %get code number from file if needbe
     if z >1
         currentCode = str2double(filenameToOpen(strfind(filenameToOpen,'CH')+2:strfind(filenameToOpen,'.')-1));
     else
         currentCode = 1;
     end
-    
+
     codesUnsorted = cat(1,codesUnsorted,ones(length(timestamps_temp),1)*currentCode);
 
     if ~isempty(find(find(rem((1:channelNumber),ceil(channelNumber/5))==0) == z,1))
@@ -209,7 +218,7 @@ end
     %sort codes finally.
     [~,sortedCodes] = sort(codesUnsorted);
     codes = codesUnsorted(sortedCodes);
-    codes = codes(:); 
+    codes = codes(:);
     waveforms = waveformsUnsorted(:,sortedCodes);
     timestamps = timestampsUnsorted(sortedCodes);
     timestamps = timestamps(:);
