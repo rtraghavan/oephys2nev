@@ -53,6 +53,9 @@ answerInNumbers = cellfun(@(x) str2double(x),answerInStrings,'UniformOutput',fal
     sortingParams.highPassCutoff,sortingParams.thresholdMult,...,
     sortingParams.waveformLength] = deal(answerInNumbers{:});
 
+
+
+
 %find out where to put file
 [savedFileName,savedFilePath] = uiputfile('*.nev','Save File As',[pathname filesep 'output' '.nev']);
 sortingParams.nevFileOutput = [savedFilePath savedFileName];

@@ -17,10 +17,10 @@ function [nevFile] = write2nev(sortingParams,waveforms,timestamps,codes,info,adc
 %
 %       timestamps:     nx1 matrix of timestamps, where n is the number
 %                       of detected threshold crossings
-%   
+%
 %       codes:          nx1 matrix of codes corresponding to which
 %                       channel a given spike was detected on
-% 
+%
 %       info:           info output given by third argument in
 %                       load_open_ephys_data_faster.m. This is a function
 %                       used by extractwaveforms.m to load data.
@@ -126,7 +126,7 @@ printFreq = ceil(length(timestamps)/5); % print a status message every this many
 fprintf('oephys2nev: Writing spikes into NEV ... ');
 
 for i = 1:length(timestamps)
-    
+
     % Read in data block header - 16 bytes
     type = 1; % 1 = spike, 4 = event, 5 = continuous
     upperByte = 0;
@@ -137,47 +137,51 @@ for i = 1:length(timestamps)
     sampleNWordsinWave = nWordsinWave;
     spikeCount = spikeCount + 1;
     totalCount = totalCount + 1;
-    
-    
+
+
     % convert timestamp to int32
     ts = cast(bitshift(upperByte,32),'uint64') + cast(timestamp,'uint64');
     ts = cast(ts,'uint32');
-    
+
     if numWaveforms > 0 % continuous data follows
         waveform = waveforms(:,i)'; %Read in wave
+
+        %comment out the above and uncomment below to take into account
+        %bit2volt conversion
         
+        %waveform = waveforms(:,i)'*info.header.bitVolts;
         if type == 1 % It's a spike! Write wave here
             writeCount = writeCount + 1;
-            
+
             fwrite(fidWrite, timestamp, 'uint32'); % Timestamp of spike
             fwrite(fidWrite, channelNum, 'uint16'); % PacketID (electrode ID number)
             fwrite(fidWrite, sortCode, 'uchar'); % Sort Code
-            
+
             if sortCode~=0
                 disp('when writing channel, there was a strange sortcode')
             end
             fwrite(fidWrite, 0, 'uchar'); % Reserved for future unit info
-            
+
             %Write waveform. In the case that we take in data via ADC
             %channels on open ephys, there is a voltage conversion
             %difference that gets washed out by conversion to int16. Just
-            %in case scale amplitude by 500 to ensure resolution. 
-            
+            %in case scale amplitude by 500 to ensure resolution.
+
             if adcChannel == 1
                 waveform = waveform*500;
             end
-            
+
             fwrite(fidWrite, waveform, 'int16'); % Write waveform
-            
+
             % status message as spikes are written
             if rem(writeCount,printFreq)==0
                 fprintf('%d%% ... ',floor((writeCount/length(timestamps))*100));
             end
         end
     end % End of numWaveforms loop
-    
-    
-    
+
+
+
 end % End of while loop to read/write waves
 
 fclose(fidWrite);

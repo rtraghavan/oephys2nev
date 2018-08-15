@@ -1,5 +1,5 @@
 
-function [waveforms,timestamps,codes,info] = extractwaveforms(dataIdentifier,filterType,lowPassCutoff,highPassCutoff,thresholdMult,waveformLength)
+function [waveforms,timestamps,codes,info] = extractwaveforms(dataIdentifier,filterOrder,lowPassCutoff,highPassCutoff,thresholdMult,waveformLength)
 
 %EXTRACTWAVEFORMS: given either a specific .continuous or .ADC file or a
 %set of .continuous fiels, extract threshold crossing times and waveforms
@@ -19,8 +19,7 @@ function [waveforms,timestamps,codes,info] = extractwaveforms(dataIdentifier,fil
 %                           stored in .continuous format that you want to
 %                           spikesort
 %
-%   filterType:             flag for filter type. Either Butterworth or
-%                           FIR. FIR will reduce speed.
+%   filterOrder:            filter order for butterworth filter. 
 %
 %   lowPassCutoff:          lowpass cutoff in Hz for extracting spikeband
 %                           signal (default 5000 Hz)
@@ -84,8 +83,10 @@ codesUnsorted = [];
 
 for z = 1:channelNumber
 
-    %read data, requires load_open_ephys_data_faster function that is available
-    %on open ephy's website at https://github.com/open-ephys/analysis-tools
+    %read data, requires load_open_ephys_data_faster function that is
+    %available on open ephy's website at
+    %https://github.com/open-ephys/analysis-tools
+    
     filenameToOpen = listingChanFiles(z).pathPlusFile;
     if exist('info','var') == 1
         [data, ~, ~] = load_open_ephys_data_faster(filenameToOpen);
@@ -100,15 +101,14 @@ for z = 1:channelNumber
 
 
     %filter data
-    %you can do this with an fir filter if you prefer, just comment out butter and replkcae it with fir1 below.
-
-    nyquist = samplingrate/2;
-    firFilterOrder = samplingrate/lowPassCutoff * 3; %filter order is 3*lowest frequency specified datapoints
-    win = hamming(firFilterOrder+1);
-
+    nyquist = samplingrate/2; %find nyquist
+    
+        %FIR FILTER SETTINGS 
+    %firFilterOrder = samplingrate/lowPassCutoff * 3; %filter order is 3*lowest frequency specified datapoints
+    %win = hamming(firFilterOrder+1);
     %[b,a]  = fir1(firFilterOrder, [lowPassCutoff highPassCutoff]/(samplingrate/2), 'bandpass', win);
 
-
+    %BUTTERWORTH FILTER SETTINGS
     [b,a] = butter(filterOrder,[highPassCutoff lowPassCutoff]/nyquist,'bandpass');
     spikeBandSignal = filtfilt(b,a,data); %zero phase filter. 
 
